@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusConverter - Her Türlü Dosya Dönüştürücü</title>
+    <style>
+        :root {
+            --primary-color: #e35835;
+            --primary-dark: #c33d1b;
+            --secondary-color: #ed7b16;
+            --dark-bg: #303030;
+            --darker-bg: #424242;
+            --light-text: #ffffff;
+            --light-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.12);
+            --success-color: #4caf50;
+            --error-color: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary-dark);
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        
+        nav a:hover {
+            opacity: 0.8;
+        }
+        
+        /* Main Content */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            margin: 2rem 0;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--light-secondary);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Converter Section */
+        .converter-container {
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2);
+        }
+        
+        .converter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .converter-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .converter-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .converter-body {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .file-drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 4px;
+            padding: 3rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .file-drop-area:hover, .file-drop-area.highlight {
+            border-color: var(--primary-color);
+        }
+        
+        .file-drop-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light-secondary);
+        }
+        
+        .file-drop-text {
+            margin-bottom: 1rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .format-selector {
+            margin-top: 1.5rem;
+        }
+        
+        .format-selector label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .format-select {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--light-text);
+            font-size: 1rem;
+        }
+        
+        .format-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .selected-files {
+            margin-top: 1.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .selected-files h4 {
+            margin-bottom: 0.5rem;
+            color: var(--light-secondary);
+        }
+        
+        .file-list {
+            list-style: none;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--error-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .convert-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .convert-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .convert-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .convert-btn:disabled {
+            background-color: var(--light-secondary);
+            cursor: not-allowed;
+        }
+        
+        .batch-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Supported Formats */
+        .formats-section {
+            margin-bottom: 3rem;
+        }
+        
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .format-card {
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2);
+        }
+        
+        .format-card h4 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .format-list {
+            list-style: none;
+        }
+        
+        .format-list li {
+            padding: 0.3rem 0;
+            color: var(--light-secondary);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--darker-bg);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links a {
+            color: var(--light-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: var(--light-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Progress and Results */
+        .progress-section {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: var(--light-secondary);
+        }
+        
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .result-item {
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .result-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--success-color);
+        }
+        
+        .result-actions {
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .download-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .clear-all-btn {
+            background-color: transparent;
+            color: var(--light-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: var(--darker-bg);
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+                    </svg>
+                </div>
+                <h1>FocusConverter</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#"><i class="fas fa-home"></i> Ana Sayfa</a></li>
+                    <li><a href="#converter"><i class="fas fa-exchange-alt"></i> Dönüştürücü</a></li>
+                    <li><a href="#formats"><i class="fas fa-file-alt"></i> Desteklenen Formatlar</a></li>
+                    <li><a href="#"><i class="fas fa-question-circle"></i> Yardım</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section class="hero">
+            <h2>Tüm Dosya Formatlarını Dönüştürün</h2>
+            <p>FocusConverter ile videolarınızı, ses dosyalarınızı, görsellerinizi ve belgelerinizi kolayca istediğiniz formata dönüştürün. Tamamen ücretsiz ve kullanımı kolay.</p>
+            <a href="#converter" class="convert-btn">Hemen Dönüştürmeye Başla</a>
+        </section>
+        
+        <section id="converter" class="converter-container">
+            <div class="converter-header">
+                <h3><i class="fas fa-sync-alt"></i> Dosya Dönüştürücü</h3>
+                <div class="batch-toggle">
+                    <span>Toplu Dönüştürme</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="batchToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="converter-body">
+                <div class="input-section">
+                    <div class="file-drop-area" id="fileDropArea">
+                        <div class="file-drop-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="file-drop-text">Dosyalarınızı buraya sürükleyin veya tıklayarak seçin</p>
+                        <p class="file-drop-hint">Birden fazla dosya seçebilirsiniz</p>
+                        <input type="file" class="file-input" id="fileInput" multiple>
+                    </div>
+                    
+                    <div class="format-selector">
+                        <label for="inputFormat"><i class="fas fa-file-import"></i> Kaynak Format</label>
+                        <select id="inputFormat" class="format-select" disabled>
+                            <option value="">Dosya seçildikten sonra otomatik belirlenecek</option>
+                        </select>
+                    </div>
+                    
+                    <div class="selected-files">
+                        <h4>Seçilen Dosyalar:</h4>
+                        <ul class="file-list" id="fileList">
+                            <!-- Dosya listesi buraya eklenecek -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <div class="conversion-icon">
+                        <div style="text-align: center; padding: 3rem 0;">
+                            <i class="fas fa-long-arrow-alt-right" style="font-size: 4rem; color: var(--primary-color);"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="format-selector">
+                        <label for="outputFormat"><i class="fas fa-file-export"></i> Hedef Format</label>
+                        <select id="outputFormat" class="format-select">
+                            <option value="">Hedef formatı seçin</option>
+                            <optgroup label="Video Formatları">
+                                <option value="mp4">MP4</option>
+                                <option value="avi">AVI</option>
+                                <option value="mov">MOV</option>
+                                <option value="wmv">WMV</option>
+                                <option value="flv">FLV</option>
+                                <option value="mkv">MKV</option>
+                                <option value="webm">WebM</option>
+                            </optgroup>
+                            <optgroup label="Ses Formatları">
+                                <option value="mp3">MP3</option>
+                                <option value="wav">WAV</option>
+                                <option value="aac">AAC</option>
+                                <option value="flac">FLAC</option>
+                                <option value="ogg">OGG</option>
+                                <option value="m4a">M4A</option>
+                                <option value="wma">WMA</option>
+                            </optgroup>
+                            <optgroup label="Resim Formatları">
+                                <option value="jpg">JPG</option>
+                                <option value="png">PNG</option>
+                                <option value="gif">GIF</option>
+                                <option value="bmp">BMP</option>
+                                <option value="svg">SVG</option>
+                                <option value="webp">WebP</option>
+                                <option value="tiff">TIFF</option>
+                            </optgroup>
+                            <optgroup label="Belge Formatları">
+                                <option value="pdf">PDF</option>
+                                <option value="doc">DOC</option>
+                                <option value="docx">DOCX</option>
+                                <option value="txt">TXT</option>
+                                <option value="rtf">RTF</option>
+                                <option value="odt">ODT</option>
+                                <option value="xls">XLS</option>
+                                <option value="xlsx">XLSX</option>
+                                <option value="ppt">PPT</option>
+                                <option value="pptx">PPTX</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="convert-options">
+                <button class="clear-all-btn" id="clearAllBtn">
+                    <i class="fas fa-trash-alt"></i> Tümünü Temizle
+                </button>
+                <button class="convert-btn" id="convertBtn" disabled>
+                    <i class="fas fa-sync-alt"></i> Dönüştürmeyi Başlat
+                </button>
+            </div>
+            
+            <div class="progress-section" id="progressSection">
+                <h4>Dönüştürme İlerlemesi</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressStatus">Hazırlanıyor...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+            
+            <div class="results-section" id="resultsSection">
+                <h4>Dönüştürülen Dosyalar</h4>
+                <div class="results-grid" id="resultsGrid">
+                    <!-- Dönüştürülen dosyalar buraya eklenecek -->
+                </div>
+            </div>
+        </section>
+        
+        <section id="formats" class="formats-section">
+            <h3><i class="fas fa-check-circle"></i> Desteklenen Formatlar</h3>
+            <p>FocusConverter aşağıdaki dosya formatlarını desteklemektedir:</p>
+            
+            <div class="formats-grid">
+                <div class="format-card">
+                    <h4><i class="fas fa-video"></i> Video Formatları</h4>
+                    <ul class="format-list">
+                        <li>MP4, AVI, MOV</li>
+                        <li>WMV, FLV, MKV</li>
+                        <li>WebM, MPEG, 3GP</li>
+                        <li>M4V, OGV, TS</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h4><i class="fas fa-music"></i> Ses Formatları</h4>
+                    <ul class="format-list">
+                        <li>MP3, WAV, AAC</li>
+                        <li>FLAC, OGG, M4A</li>
+                        <li>WMA, AIFF, AMR</li>
+                        <li>OPUS, RA, AU</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h4><i class="fas fa-image"></i> Resim Formatları</h4>
+                    <ul class="format-list">
+                        <li>JPG, PNG, GIF</li>
+                        <li>BMP, SVG, WebP</li>
+                        <li>TIFF, ICO, PSD</li>
+                        <li>RAW, EPS, PDF</li>
+                    </ul>
+                </div>
+                
+                <div class="format-card">
+                    <h4><i class="fas fa-file-alt"></i> Belge Formatları</h4>
+                    <ul class="format-list">
+                        <li>PDF, DOC, DOCX</li>
+                        <li>TXT, RTF, ODT</li>
+                        <li>XLS, XLSX, CSV</li>
+                        <li>PPT, PPTX, HTML</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-shield-alt"></i> Gizlilik Politikası</a>
+                <a href="#"><i class="fas fa-file-contract"></i> Kullanım Şartları</a>
+                <a href="#"><i class="fas fa-question-circle"></i> Yardım</a>
+                <a href="#"><i class="fas fa-envelope"></i> İletişim</a>
+                <a href="#"><i class="fas fa-blog"></i> Blog</a>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+            <p class="copyright">© 2023 FocusConverter. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+    
+    <div class="notification" id="notification">
+        <div class="notification-icon" id="notificationIcon"></div>
+        <div>
+            <div id="notificationTitle">Bildirim Başlığı</div>
+            <div id="notificationMessage">Bildirim mesajı buraya gelecek</div>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elementleri
+        const fileInput = document.getElementById('fileInput');
+        const fileDropArea = document.getElementById('fileDropArea');
+        const fileList = document.getElementById('fileList');
+        const inputFormat = document.getElementById('inputFormat');
+        const outputFormat = document.getElementById('outputFormat');
+        const convertBtn = document.getElementById('convertBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const batchToggle = document.getElementById('batchToggle');
+        const progressSection = document.getElementById('progressSection');
+        const progressFill = document.getElementById('progressFill');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressPercent = document.getElementById('progressPercent');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const notification = document.getElementById('notification');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationTitle = document.getElementById('notificationTitle');
+        const notificationMessage = document.getElementById('notificationMessage');
+        
+        // Dosya listesi
+        let selectedFiles = [];
+        let isBatchMode = false;
+        
+        // Format eşleştirme
+        const formatMap = {
+            // Video formatları
+            'mp4': 'video', 'avi': 'video', 'mov': 'video', 'wmv': 'video',
+            'flv': 'video', 'mkv': 'video', 'webm': 'video', 'mpeg': 'video',
+            'mpg': 'video', '3gp': 'video', 'm4v': 'video', 'ogv': 'video',
+            
+            // Ses formatları
+            'mp3': 'audio', 'wav': 'audio', 'aac': 'audio', 'flac': 'audio',
+            'ogg': 'audio', 'm4a': 'audio', 'wma': 'audio', 'aiff': 'audio',
+            'amr': 'audio', 'opus': 'audio',
+            
+            // Resim formatları
+            'jpg': 'image', 'jpeg': 'image', 'png': 'image', 'gif': 'image',
+            'bmp': 'image', 'svg': 'image', 'webp': 'image', 'tiff': 'image',
+            'ico': 'image', 'psd': 'image', 'raw': 'image', 'eps': 'image',
+            
+            // Belge formatları
+            'pdf': 'document', 'doc': 'document', 'docx': 'document', 'txt': 'document',
+            'rtf': 'document', 'odt': 'document', 'xls': 'document', 'xlsx': 'document',
+            'csv': 'document', 'ppt': 'document', 'pptx': 'document', 'html': 'document',
+            'htm': 'document'
+        };
+        
+        // Event Listeners
+        fileDropArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        fileDropArea.addEventListener('dragover', handleDragOver);
+        fileDropArea.addEventListener('dragleave', handleDragLeave);
+        fileDropArea.addEventListener('drop', handleDrop);
+        convertBtn.addEventListener('click', startConversion);
+        clearAllBtn.addEventListener('click', clearAllFiles);
+        batchToggle.addEventListener('change', toggleBatchMode);
+        outputFormat.addEventListener('change', updateConvertButtonState);
+        
+        // Dosya seçimi işleme
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            addFilesToList(files);
+        }
+        
+        // Sürükle-bırak işlemleri
+        function handleDragOver(e) {
+            e.preventDefault();
+            fileDropArea.classList.add('highlight');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            fileDropArea.classList.remove('highlight');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            fileDropArea.classList.remove('highlight');
+            
+            const files = e.dataTransfer.files;
+            addFilesToList(files);
+        }
+        
+        // Dosyaları listeye ekle
+        function addFilesToList(files) {
+            if (files.length === 0) return;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExtension = getFileExtension(file.name).toLowerCase();
+                const fileType = formatMap[fileExtension] || 'unknown';
+                
+                // Dosya türü destekleniyor mu kontrol et
+                if (fileType === 'unknown') {
+                    showNotification('Hata', `${file.name} formatı desteklenmiyor`, 'error');
+                    continue;
+                }
+                
+                // Dosya zaten listede var mı kontrol et
+                if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    showNotification('Uyarı', `${file.name} zaten listede`, 'info');
+                    continue;
+                }
+                
+                // Dosya bilgilerini ekle
+                selectedFiles.push({
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    type: fileType,
+                    extension: fileExtension,
+                    id: Date.now() + i
+                });
+            }
+            
+            updateFileList();
+            updateInputFormat();
+            updateConvertButtonState();
+            
+            showNotification('Başarılı', `${files.length} dosya eklendi`, 'success');
+        }
+        
+        // Dosya uzantısını alma
+        function getFileExtension(filename) {
+            return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
+        }
+        
+        // Dosya listesini güncelle
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '<li style="padding: 1rem; text-align: center; color: var(--light-secondary);">Henüz dosya seçilmedi</li>';
+                return;
+            }
+            
+            selectedFiles.forEach((file, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'file-item';
+                
+                // Dosya boyutunu formatla
+                const fileSize = formatFileSize(file.size);
+                
+                listItem.innerHTML = `
+                    <div>
+                        <div><strong>${file.name}</strong></div>
+                        <div style="font-size: 0.8rem; color: var(--light-secondary);">${fileSize} • ${file.extension.toUpperCase()}</div>
+                    </div>
+                    <button class="remove-file" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                fileList.appendChild(listItem);
+            });
+            
+            // Kaldırma butonlarına event listener ekle
+            document.querySelectorAll('.remove-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    removeFile(index);
+                });
+            });
+        }
+        
+        // Dosya boyutunu formatla
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Dosyayı listeden kaldır
+        function removeFile(index) {
+            if (index >= 0 && index < selectedFiles.length) {
+                const removedFile = selectedFiles[index].name;
+                selectedFiles.splice(index, 1);
+                updateFileList();
+                updateInputFormat();
+                updateConvertButtonState();
+                showNotification('Bilgi', `${removedFile} listeden kaldırıldı`, 'info');
+            }
+        }
+        
+        // Tüm dosyaları temizle
+        function clearAllFiles() {
+            if (selectedFiles.length === 0) return;
+            
+            selectedFiles = [];
+            updateFileList();
+            updateInputFormat();
+            updateConvertButtonState();
+            hideProgressAndResults();
+            showNotification('Bilgi', 'Tüm dosyalar temizlendi', 'info');
+        }
+        
+        // Girdi formatını güncelle
+        function updateInputFormat() {
+            if (selectedFiles.length === 0) {
+                inputFormat.innerHTML = '<option value="">Dosya seçildikten sonra otomatik belirlenecek</option>';
+                inputFormat.disabled = true;
+                return;
+            }
+            
+            inputFormat.disabled = false;
+            inputFormat.innerHTML = '';
+            
+            // Tüm dosyaların formatlarını topla
+            const allExtensions = [...new Set(selectedFiles.map(f => f.extension))];
+            
+            if (allExtensions.length === 1) {
+                // Tek format varsa onu seç
+                const ext = allExtensions[0];
+                inputFormat.innerHTML = `<option value="${ext}" selected>${ext.toUpperCase()}</option>`;
+            } else {
+                // Birden fazla format varsa
+                inputFormat.innerHTML = '<option value="multiple" selected>Birden fazla format</option>';
+                
+                allExtensions.forEach(ext => {
+                    const option = document.createElement('option');
+                    option.value = ext;
+                    option.textContent = ext.toUpperCase();
+                    inputFormat.appendChild(option);
+                });
+            }
+        }
+        
+        // Toplu dönüştürme modunu değiştir
+        function toggleBatchMode() {
+            isBatchMode = batchToggle.checked;
+            showNotification('Bilgi', `Toplu dönüştürme ${isBatchMode ? 'açıldı' : 'kapandı'}`, 'info');
+        }
+        
+        // Dönüştür butonunun durumunu güncelle
+        function updateConvertButtonState() {
+            const hasFiles = selectedFiles.length > 0;
+            const hasOutputFormat = outputFormat.value !== '';
+            
+            convertBtn.disabled = !(hasFiles && hasOutputFormat);
+        }
+        
+        // Dönüştürme işlemini başlat
+        function startConversion() {
+            if (selectedFiles.length === 0 || outputFormat.value === '') return;
+            
+            // İlerleme bölümünü göster
+            progressSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+            
+            // İlerleme durumunu sıfırla
+            progressFill.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressStatus.textContent = 'Hazırlanıyor...';
+            
+            // Simüle edilmiş dönüştürme işlemi
+            simulateConversion();
+        }
+        
+        // Dönüştürme işlemini simüle et (gerçek uygulamada backend API çağrısı yapılacak)
+        function simulateConversion() {
+            const totalFiles = selectedFiles.length;
+            let completedFiles = 0;
+            const targetFormat = outputFormat.value;
+            
+            // Sonuçları temizle
+            resultsGrid.innerHTML = '';
+            
+            // Her dosya için dönüştürme simülasyonu
+            selectedFiles.forEach((file, index) => {
+                setTimeout(() => {
+                    // İlerleme güncelle
+                    completedFiles++;
+                    const progress = Math.round((completedFiles / totalFiles) * 100);
+                    
+                    progressFill.style.width = `${progress}%`;
+                    progressPercent.textContent = `${progress}%`;
+                    progressStatus.textContent = `${completedFiles}/${totalFiles} dosya dönüştürüldü`;
+                    
+                    // Dosyayı "dönüştür"
+                    const convertedFileName = file.name.replace(`.${file.extension}`, `.${targetFormat}`);
+                    
+                    // Sonuçları ekle
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    // Dosya türüne göre ikon seç
+                    let fileIcon = 'fa-file';
+                    if (formatMap[targetFormat] === 'video') fileIcon = 'fa-file-video';
+                    else if (formatMap[targetFormat] === 'audio') fileIcon = 'fa-file-audio';
+                    else if (formatMap[targetFormat] === 'image') fileIcon = 'fa-file-image';
+                    else if (formatMap[targetFormat] === 'document') fileIcon = 'fa-file-alt';
+                    
+                    resultItem.innerHTML = `
+                        <div class="result-icon">
+                            <i class="fas ${fileIcon}"></i>
+                        </div>
+                        <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">${convertedFileName}</div>
+                        <div style="font-size: 0.7rem; color: var(--light-secondary); margin-bottom: 0.5rem;">${formatFileSize(file.size)}</div>
+                        <div class="result-actions">
+                            <a href="#" class="download-btn" onclick="downloadFile('${convertedFileName}')">
+                                <i class="fas fa-download"></i> İndir
+                            </a>
+                            <button class="clear-all-btn" onclick="removeConvertedFile(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    resultsGrid.appendChild(resultItem);
+                    
+                    // Tüm dosyalar dönüştürüldüğünde
+                    if (completedFiles === totalFiles) {
+                        progressStatus.textContent = 'Dönüştürme tamamlandı!';
+                        
+                        // Sonuçları göster
+                        setTimeout(() => {
+                            resultsSection.style.display = 'block';
+                            showNotification('Başarılı', `${totalFiles} dosya başarıyla dönüştürüldü`, 'success');
+                        }, 500);
+                    }
+                }, index * 1000); // Simüle edilmiş gecikme
+            });
+        }
+        
+        // İlerleme ve sonuç bölümlerini gizle
+        function hideProgressAndResults() {
+            progressSection.style.display = 'none';
+            resultsSection.style.display = 'none';
+        }
+        
+        // Bildirim göster
+        function showNotification(title, message, type) {
+            // Bildirim ikonunu ayarla
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            else if (type === 'error') icon = 'fa-exclamation-circle';
+            else if (type === 'info') icon = 'fa-info-circle';
+            
+            notificationIcon.className = `notification-icon fas ${icon}`;
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            
+            // Bildirim türüne göre sınıf ayarla
+            notification.className = `notification ${type}`;
+            
+            // Bildirimi göster
+            notification.classList.add('show');
+            
+            // 5 saniye sonra bildirimi gizle
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Dosya indirme fonksiyonu (simüle edilmiş)
+        function downloadFile(filename) {
+            showNotification('Bilgi', `${filename} indiriliyor (simülasyon)`, 'info');
+            // Gerçek uygulamada burada dosya indirme işlemi yapılacak
+            return false;
+        }
+        
+        // Dönüştürülen dosyayı kaldır
+        function removeConvertedFile(button) {
+            const resultItem = button.closest('.result-item');
+            resultItem.remove();
+            showNotification('Bilgi', 'Dosya listeden kaldırıldı', 'info');
+        }
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // Başlangıç durumunu ayarla
+            updateFileList();
+            updateInputFormat();
+            updateConvertButtonState();
+        });
+    </script>
+</body>
+  </html>
